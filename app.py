@@ -1,199 +1,149 @@
+# task_page.py — 部署为独立的 Streamlit 应用
 import streamlit as st
-import requests
-import json
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime
 
-# ==========================================
-# 1. 配置区域
-# ==========================================
+st.set_page_config(page_title="Task Guide", page_icon="📝", layout="centered")
 
-# 从 Streamlit Secrets 获取敏感信息 (稍后会在网页后台填)
-# 这样代码里就不包含任何密码，非常安全
-try:
-    COZE_API_TOKEN = st.secrets["coze"]["api_token"]
-    BOT_ID = st.secrets["coze"]["bot_id"]
-    SHEET_NAME = st.secrets["google"]["sheet_name"]
-    # 班级密码 (可选，这里先设为通用密码)
-    CLASS_PASSWORD = "888" 
-except:
-    # 这是一个防呆设计，防止本地运行时报错太难看
-    st.error("⚠️ 尚未配置 Secrets！请在 Streamlit Cloud 后台配置。")
-    st.stop()
+# --- 任务页面 ---
+st.markdown("## 📝 Today's Task")
+st.divider()
 
-# ==========================================
-# 2. 数据库功能：Google Sheets
-# ==========================================
+st.markdown("""
+### Context
+- **Subject:** English (Grade 8, Mainland China, English as L2)
+- **Activity:** Lead-in — Free talk about "healthy" and "strong"
+- **Purpose:** Elicit and introduce the lesson topic
+""")
 
-def get_google_sheet():
-    """连接到 Google 表格"""
-    scope = ['https://spreadsheets.google.com/feeds',
-             'https://www.googleapis.com/auth/drive']
-    
-    try:
-        # 从 Secrets 里读取 JSON 内容
-        # 注意：我们需要把 toml 里的字典转换回 json 对象
-        json_creds = dict(st.secrets["gcp_service_account"])
-        
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(json_creds, scope)
-        client = gspread.authorize(creds)
-        
-        # 打开指定的表格
-        sheet = client.open(SHEET_NAME).sheet1
-        return sheet
-    except Exception as e:
-        st.error(f"无法连接数据库，请联系老师。错误详情: {e}")
-        return None
+st.markdown("### Classroom Transcript")
 
-def save_to_sheet(sheet, user_name, role, content):
-    """保存一条对话记录"""
-    if sheet:
-        time_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        try:
-            # 追加一行：[时间, 学生姓名, 角色, 内容]
-            sheet.append_row([time_now, user_name, role, content])
-        except Exception as e:
-            # 如果网络抖动保存失败，不影响学生继续对话，只在后台打印
-            print(f"Save failed: {e}")
+transcript_data = [
+    (1, "T", 'Now, look at the screen. As you can see the topic for this class is Growing Healthy, Growing Strong. Tell me, do you think you are healthy and strong? If you think you are healthy, raise your hand. Oh, you think you are healthy. Put your hands down. You think you are healthy and strong, right? What makes you so healthy?'),
+    (2, "S1", "Exercise."),
+    (3, "T", "Oh, you exercise. How about you? Do you think you are healthy and strong?"),
+    (4, "S2", "Yes."),
+    (5, "T", "What makes you so healthy and strong?"),
+    (6, "S2", "I do exercise and eat healthy food."),
+    (7, "T", "Exercise and healthy food, thank you. Anyone else?"),
+    (8, "S3", "I hardly eat junk food."),
+    (9, "T", "Oh, you never eat junk food. Thank you. So, most of you think you're healthy. But do you think you're strong? If you think you're strong, raise your hand. Only two of you. You think you're strong. What makes you so strong?"),
+    (10, "S4", "I play sports."),
+    (11, "T", "Do you have a lot of muscles? Because people who are strong usually have muscles, right? Do you have muscles?"),
+    (12, "S4", "Maybe?"),
+    (13, "T", "Maybe, okay. So S4, you're saying that playing sports helps you become strong, even if you're not sure about the muscles part. Is that what you mean?"),
+    (14, "S4", "Yes, I think sports make me strong."),
+    (15, "T", "Good. Now, S1 said exercise, S2 said exercise and healthy food, S3 said avoiding junk food, and S4 said playing sports. These are all interesting ideas. S2 mentioned both exercise AND healthy food. Do you agree with S2 that you need both? Or is one enough? What do you think, S3?"),
+    (16, "S3", "I think... both. Because only exercise is not enough."),
+    (17, "T", "Okay, not enough. Can you say more about that? Why is exercise alone not enough?"),
+    (18, "S3", "Um... because if you only exercise but eat bad food, you will not be healthy."),
+    (19, "T", "Okay, thank you. So it seems like many of you think being healthy needs both exercise and good food. Very good. Now, today we're going to read about a health camp. Can you guess what people do in a health camp?"),
+    (20, "S5", "Exercise and eat healthy food."),
+]
 
-def load_history_from_sheet(sheet, user_name):
-    """加载历史记录 (断点续传)"""
-    if not sheet:
-        return []
-        
-    try:
-        # 获取所有记录 (注意：如果数据量上万条，这里需要优化，目前几百条没问题)
-        all_records = sheet.get_all_values() 
-        # get_all_values 返回的是列表的列表，第一行通常是表头
-        
-        user_history = []
-        # 跳过表头 (假设第一行是标题)
-        for row in all_records[1:]:
-            # 假设结构是: [时间, 姓名, 角色, 内容]
-            # row[1] 是姓名，row[2] 是角色，row[3] 是内容
-            if len(row) >= 4 and row[1] == user_name:
-                role_map = {"学生": "user", "AI": "assistant", "AI导师": "assistant"}
-                role = role_map.get(row[2], "assistant")
-                user_history.append({"role": role, "content": row[3]})
-        return user_history
-    except Exception as e:
-        st.warning(f"历史记录加载失败: {e}")
-        return []
+# 用 Streamlit 原生表格显示
+import pandas as pd
+df = pd.DataFrame(transcript_data, columns=["Turn", "Speaker", "Content"])
+st.dataframe(df, use_container_width=True, hide_index=True)
 
-# ==========================================
-# 3. AI 核心：Coze API (流式)
-# ==========================================
+st.divider()
 
-def chat_with_coze(query, user_name):
-    url = "https://api.coze.cn/v3/chat"
-    headers = {
-        "Authorization": f"Bearer {COZE_API_TOKEN}",
-        "Content-Type": "application/json"
-    }
-    
-    # 使用 safe_user_id 确保 Coze 后台也能区分用户
-    data = {
-        "bot_id": BOT_ID,
-        "user_id": f"stu_{user_name}",
-        "stream": True,
-        "auto_save_history": True,
-        "additional_messages": [
-            {"role": "user", "content": query, "content_type": "text"}
-        ]
-    }
-    
-    try:
-        response = requests.post(url, headers=headers, json=data, stream=True)
-        if response.status_code != 200:
-            return f"🚫 网络连接失败: {response.status_code}"
-            
-        full_content = ""
-        for line in response.iter_lines():
-            if not line: continue
-            decoded_line = line.decode('utf-8')
-            if decoded_line.startswith("data:"):
-                json_str = decoded_line[5:]
-                try:
-                    if json_str.strip() == "[DONE]": continue
-                    chunk = json.loads(json_str)
-                    if chunk.get('event') == 'conversation.message.delta' or chunk.get('type') == 'answer':
-                        content = chunk.get('content', '')
-                        full_content += content
-                except: continue
+# --- Part 1 ---
+st.markdown("### Part 1: Identify & Justify (15 min)")
+st.markdown("""
+Read the classroom transcript carefully. Identify all the dialogic teaching strategies (talk moves) you can find. For each one:
 
-        if not full_content:
-            return "🤔 AI 思考中..."
-        return full_content
+1. **Quote** the specific line(s) from the transcript
+2. **Name** the talk move
+3. **Explain** why you think it is that particular move (not just label it)
 
-    except Exception as e:
-        return f"💥 出错: {str(e)}"
+⚠️ Note: Some parts of the dialogue might look like a talk move but may not fully qualify. Include those too and explain your reasoning.
 
-# ==========================================
-# 4. 网页主逻辑
-# ==========================================
+💡 **Use the AI chatbot to help you** — discuss your analysis, ask questions, check your reasoning.
+""")
 
-st.set_page_config(page_title="AI 教学助手", page_icon="🎓", layout="wide")
+st.info("📋 When you finish Part 1, submit your analysis in the form below before moving on.")
+# ✏️ 你可以在这里嵌入问卷链接
+st.markdown("[📋 Submit Part 1 Analysis](YOUR_SURVEY_LINK_HERE)", unsafe_allow_html=False)
 
-# 连接数据库 (只连接一次)
-if "db_conn" not in st.session_state:
-    st.session_state.db_conn = get_google_sheet()
+st.divider()
 
-# --- 登录页 ---
-if 'user_name' not in st.session_state:
-    st.markdown("<h1 style='text-align: center;'>🎓 登录你的课堂</h1>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1,2,1])
-    with col2:
-        name_input = st.text_input("👤 你的姓名 (拼音或英文)：", placeholder="例如：ZhangSan")
-        pwd_input = st.text_input("🔑 班级暗号：", type="password")
-        
-        if st.button("🚀 开始学习", use_container_width=True):
-            if name_input and pwd_input == CLASS_PASSWORD:
-                st.session_state.user_name = name_input
-                # 🌟 登陆成功瞬间，去数据库拉取历史记录
-                with st.spinner("正在同步你的学习进度..."):
-                    history = load_history_from_sheet(st.session_state.db_conn, name_input)
-                    st.session_state.messages = history
-                st.rerun()
-            elif pwd_input != CLASS_PASSWORD:
-                st.error("暗号错误！")
-            else:
-                st.error("请输入姓名。")
-    st.stop()
+# --- Part 2 ---
+st.markdown("### Part 2: Analyse & Evaluate (20 min)")
+st.markdown("""
+Now evaluate the overall quality of the classroom dialogue. Consider questions like:
 
-# --- 聊天页 ---
-with st.sidebar:
-    st.write(f"当前学生: **{st.session_state.user_name}**")
-    if st.button("🚪 退出 (清除缓存)"):
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
-        st.rerun()
+- Does the dialogue achieve the learning goals of this segment?
+- Which talk moves were used effectively? Why?
+- Which ones were used less effectively or could have been better? Why?
+- Are there any **missed opportunities** — moments where the teacher could have used a talk move but didn't?
+- Did all students participate, or only a limited number?
+- Choose one section (3-5 turns) that you think could be improved. **Rewrite it** to demonstrate better use of dialogic teaching strategies.
 
-st.title("🤖 教学对话练习")
+💡 **Use the AI chatbot to help you** — discuss your evaluation, try out rewrite ideas, get feedback.
+""")
 
-# 显示历史
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+st.info("📤 When you finish Part 2, post your evaluation to the Moodle Discussion Forum.")
+st.markdown("[📤 Submit to Moodle Discussion Forum](YOUR_MOODLE_LINK_HERE)", unsafe_allow_html=False)
 
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
+st.divider()
 
-# 处理输入
-if prompt := st.chat_input("请输入回答..."):
-    # 1. 用户
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    # ☁️ 存数据库
-    save_to_sheet(st.session_state.db_conn, st.session_state.user_name, "学生", prompt)
+# --- APT 知识库 ---
+st.markdown("## 📖 Reference: APT Talk Moves")
 
-    # 2. AI
-    with st.chat_message("assistant"):
-        response = chat_with_coze(prompt, st.session_state.user_name)
-        st.markdown(response)
-            
-    # 3. AI 记录
-    st.session_state.messages.append({"role": "assistant", "content": response})
-    # ☁️ 存数据库
-    save_to_sheet(st.session_state.db_conn, st.session_state.user_name, "AI", response)
+with st.expander("🎯 Goal 1: Help students share, expand, and clarify their thinking", expanded=False):
+    st.markdown("""
+**Move 1 — "Say More"**
+Ask students to elaborate on a brief, vague, or unclear statement.
+> *"Can you say more about that?" / "What do you mean by that?" / "Can you give an example?"*
+
+---
+
+**Move 2 — "Revoice"**
+The teacher restates a student's reasoning and gives them a chance to confirm or correct.
+> *"So let me see if I understand — you're saying … Is that right?"*
+""")
+
+with st.expander("🎯 Goal 2: Help students deepen their reasoning", expanded=False):
+    st.markdown("""
+**Move 3 — "Press for Reasoning"**
+Ask students to explain the thinking behind their answer.
+> *"Why do you think that?" / "What's your evidence?" / "How did you arrive at that answer?"*
+
+---
+
+**Move 4 — "Challenge"**
+Offer a counter-example or alternative perspective to test and deepen reasoning.
+> *"Is that always the case?" / "What if...?" / "What would someone who disagrees say?"*
+""")
+
+with st.expander("🎯 Goal 3: Help students listen carefully to one another", expanded=False):
+    st.markdown("""
+**Move 5 — "Restate"**
+Prompt students to repeat or paraphrase what someone else said.
+> *"Who can repeat what Javon just said, in your own words?"*
+""")
+
+with st.expander("🎯 Goal 4: Help students think with others", expanded=False):
+    st.markdown("""
+**Move 6 — "Agree / Disagree"**
+Ask students to take a position on someone else's idea and explain why.
+> *"Do you agree or disagree? Why?"*
+
+---
+
+**Move 7 — "Add On"**
+Invite students to build on or extend a classmate's idea.
+> *"Who can add on to what Jamal said?"*
+
+---
+
+**Move 8 — "Explain Other"**
+Ask a student to explain another student's reasoning.
+> *"Why do you think he said that?" / "Can you explain her reasoning in your own words?"*
+""")
+
+with st.expander("📐 Accountable Talk: Three Dimensions", expanded=False):
+    st.markdown("""
+- **To the Community:** Listen carefully, paraphrase & build on each other's ideas, challenge ideas not people.
+- **To Accurate Knowledge:** Be specific and accurate, use verifiable sources.
+- **To Rigorous Thinking:** Push for quality of claims & arguments, use sufficient and credible evidence.
+""")
