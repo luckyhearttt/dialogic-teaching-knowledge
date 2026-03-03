@@ -29,7 +29,7 @@ st.markdown("""
 st.markdown("### Transcript")
 
 transcript_data = [
-    (1, "T", 'Now, look at the screen. As you can see the topic for this class is Growing Healthy, Growing Strong. Tell me, do you think you are healthy and strong? If you think you are healthy, raise your hand. Oh, you think you are healthy. Put your hands down. You think you are healthy and strong, right? What makes you so healthy?'),
+    (1, "T", 'Now, look at the screen. As you can see the topic for this class is Growing Healthy, Growing Strong. Tell me, do you think you are healthy and strong? You think you are healthy and strong, right? What makes you so healthy?'),
     (2, "S1", "Exercise."),
     (3, "T", "Oh, you exercise. How about you? Do you think you are healthy and strong?"),
     (4, "S2", "Yes."),
@@ -37,18 +37,15 @@ transcript_data = [
     (6, "S2", "I do exercise and eat healthy food."),
     (7, "T", "Exercise and healthy food, thank you. Anyone else?"),
     (8, "S3", "I hardly eat junk food."),
-    (9, "T", 'Oh, you never eat junk food. Thank you. So, most of you think you\'re healthy. But do you think you\'re strong? If you think you\'re strong, raise your hand. Only two of you. You think you\'re strong. What makes you so strong?'),
+    (9, "T", 'Oh, you never eat junk food. Thank you. So, most of you think you\'re healthy. But do you think you\'re strong? You think you\'re strong. What makes you so strong?'),
     (10, "S4", "I play sports."),
     (11, "T", "Do you have a lot of muscles? Because people who are strong usually have muscles, right? Do you have muscles?"),
     (12, "S4", "Maybe?"),
     (13, "T", 'Maybe, okay. So S4, you\'re saying that playing sports helps you become strong, even if you\'re not sure about the muscles part. Is that what you mean?'),
     (14, "S4", "Yes, I think sports make me strong."),
-    (15, "T", 'Good. Now, S1 said exercise, S2 said exercise and healthy food, S3 said avoiding junk food, and S4 said playing sports. These are all interesting ideas. S2 mentioned both exercise AND healthy food. Do you agree with S2 that you need both? Or is one enough? What do you think, S3?'),
-    (16, "S3", "I think... both. Because only exercise is not enough."),
-    (17, "T", "Okay, not enough. Can you say more about that? Why is exercise alone not enough?"),
-    (18, "S3", "Um... because if you only exercise but eat bad food, you will not be healthy."),
-    (19, "T", 'Okay, thank you. So it seems like many of you think being healthy needs both exercise and good food. Very good. Now, today we\'re going to read about a health camp. Can you guess what people do in a health camp?'),
-    (20, "S5", "Exercise and eat healthy food."),
+    (15, "T", 'Good. Now, S1 said exercise, S2 said exercise and healthy food, S3 said avoiding junk food, and S4 said playing sports. These are all interesting ideas. S2 mentioned both exercise AND healthy food. Do you agree with S2 that you need both? Or is one enough? What do you think, S5?'),
+    (16, "S5", "I think... both"),
+    (17, "T", "Okay, thank you. So it seems like many of you think being healthy needs both exercise and good food. Very good."),
 ]
 
 df = pd.DataFrame(transcript_data, columns=["Turn", "Speaker", "Content"])
@@ -120,5 +117,6 @@ with st.expander("📐 Accountable Talk: Three Dimensions", expanded=False):
 - **To Accurate Knowledge:** Be specific and accurate, use verifiable sources.
 - **To Rigorous Thinking:** Push for quality of claims & arguments, use sufficient and credible evidence.
 """)
+
 
 
