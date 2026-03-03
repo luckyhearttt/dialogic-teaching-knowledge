@@ -52,7 +52,7 @@ transcript_data = [
 ]
 
 df = pd.DataFrame(transcript_data, columns=["Turn", "Speaker", "Content"])
-st.dataframe(df, use_container_width=True, hide_index=True)
+st.table(df.set_index("Turn"))
 
 st.divider()
 
@@ -120,4 +120,5 @@ with st.expander("📐 Accountable Talk: Three Dimensions", expanded=False):
 - **To Accurate Knowledge:** Be specific and accurate, use verifiable sources.
 - **To Rigorous Thinking:** Push for quality of claims & arguments, use sufficient and credible evidence.
 """)
+
 
