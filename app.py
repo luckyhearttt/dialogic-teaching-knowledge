@@ -32,8 +32,8 @@ transcript_data = [
     (1, "T", 'Now, look at the screen. As you can see the topic for this class is Growing Healthy, Growing Strong. Tell me, do you think you are healthy and strong? If you think you are healthy, raise your hand. Oh, you think you are healthy. Put your hands down. You think you are healthy and strong, right? What makes you so healthy?'),
     (2, "S1", "Exercise."),
     (3, "T", "Oh, you exercise. How about you? Do you think you are healthy and strong?"),
-    (4, "S2", "I think yes, because I have good habits."),
-    (5, "T", "What do you mean by good habits?"),
+    (4, "S2", "Yes."),
+    (5, "T", "What makes you so healthy and strong?"),
     (6, "S2", "I do exercise and eat healthy food."),
     (7, "T", "Exercise and healthy food, thank you. Anyone else?"),
     (8, "S3", "I hardly eat junk food."),
@@ -117,6 +117,7 @@ with st.expander("📐 Accountable Talk: Three Dimensions", expanded=False):
 - **To Accurate Knowledge:** Be specific and accurate, use verifiable sources.
 - **To Rigorous Thinking:** Push for quality of claims & arguments, use sufficient and credible evidence.
 """)
+
 
 
 
