@@ -20,7 +20,7 @@ st.markdown("## 📝 Classroom Transcript")
 st.divider()
 
 st.markdown("""
-### Context
+### Transcript Background
 - **Subject:** English (Grade 8, Mainland China, English as L2)
 - **Activity:** Lead-in — Free talk about "healthy" and "strong"
 - **Purpose:** Elicit and introduce the lesson topic
@@ -117,6 +117,7 @@ with st.expander("📐 Accountable Talk: Three Dimensions", expanded=False):
 - **To Accurate Knowledge:** Be specific and accurate, use verifiable sources.
 - **To Rigorous Thinking:** Push for quality of claims & arguments, use sufficient and credible evidence.
 """)
+
 
 
 
