@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="Task Guide", page_icon="📝", layout="centered")
+st.set_page_config(page_title="Transcript & Reference", page_icon="📝", layout="centered")
 
 hide_st_style = """
             <style>
@@ -117,6 +117,7 @@ with st.expander("📐 Accountable Talk: Three Dimensions", expanded=False):
 - **To Accurate Knowledge:** Be specific and accurate, use verifiable sources.
 - **To Rigorous Thinking:** Push for quality of claims & arguments, use sufficient and credible evidence.
 """)
+
 
 
 
