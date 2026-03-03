@@ -1,10 +1,22 @@
-# task_page.py — 部署为独立的 Streamlit 应用
 import streamlit as st
+import pandas as pd
 
 st.set_page_config(page_title="Task Guide", page_icon="📝", layout="centered")
 
-# --- 任务页面 ---
-st.markdown("## 📝 Today's Task")
+hide_st_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            .stDeployButton {display: none;}
+            </style>
+            """
+st.markdown(hide_st_style, unsafe_allow_html=True)
+
+# ==========================================
+# 1. Transcript Background & Content
+# ==========================================
+
+st.markdown("## 📝 Classroom Transcript")
 st.divider()
 
 st.markdown("""
@@ -14,7 +26,7 @@ st.markdown("""
 - **Purpose:** Elicit and introduce the lesson topic
 """)
 
-st.markdown("### Classroom Transcript")
+st.markdown("### Transcript")
 
 transcript_data = [
     (1, "T", 'Now, look at the screen. As you can see the topic for this class is Growing Healthy, Growing Strong. Tell me, do you think you are healthy and strong? If you think you are healthy, raise your hand. Oh, you think you are healthy. Put your hands down. You think you are healthy and strong, right? What makes you so healthy?'),
@@ -25,68 +37,29 @@ transcript_data = [
     (6, "S2", "I do exercise and eat healthy food."),
     (7, "T", "Exercise and healthy food, thank you. Anyone else?"),
     (8, "S3", "I hardly eat junk food."),
-    (9, "T", "Oh, you never eat junk food. Thank you. So, most of you think you're healthy. But do you think you're strong? If you think you're strong, raise your hand. Only two of you. You think you're strong. What makes you so strong?"),
+    (9, "T", 'Oh, you never eat junk food. Thank you. So, most of you think you\'re healthy. But do you think you\'re strong? If you think you\'re strong, raise your hand. Only two of you. You think you\'re strong. What makes you so strong?'),
     (10, "S4", "I play sports."),
     (11, "T", "Do you have a lot of muscles? Because people who are strong usually have muscles, right? Do you have muscles?"),
     (12, "S4", "Maybe?"),
-    (13, "T", "Maybe, okay. So S4, you're saying that playing sports helps you become strong, even if you're not sure about the muscles part. Is that what you mean?"),
+    (13, "T", 'Maybe, okay. So S4, you\'re saying that playing sports helps you become strong, even if you\'re not sure about the muscles part. Is that what you mean?'),
     (14, "S4", "Yes, I think sports make me strong."),
-    (15, "T", "Good. Now, S1 said exercise, S2 said exercise and healthy food, S3 said avoiding junk food, and S4 said playing sports. These are all interesting ideas. S2 mentioned both exercise AND healthy food. Do you agree with S2 that you need both? Or is one enough? What do you think, S3?"),
+    (15, "T", 'Good. Now, S1 said exercise, S2 said exercise and healthy food, S3 said avoiding junk food, and S4 said playing sports. These are all interesting ideas. S2 mentioned both exercise AND healthy food. Do you agree with S2 that you need both? Or is one enough? What do you think, S3?'),
     (16, "S3", "I think... both. Because only exercise is not enough."),
     (17, "T", "Okay, not enough. Can you say more about that? Why is exercise alone not enough?"),
     (18, "S3", "Um... because if you only exercise but eat bad food, you will not be healthy."),
-    (19, "T", "Okay, thank you. So it seems like many of you think being healthy needs both exercise and good food. Very good. Now, today we're going to read about a health camp. Can you guess what people do in a health camp?"),
+    (19, "T", 'Okay, thank you. So it seems like many of you think being healthy needs both exercise and good food. Very good. Now, today we\'re going to read about a health camp. Can you guess what people do in a health camp?'),
     (20, "S5", "Exercise and eat healthy food."),
 ]
 
-# 用 Streamlit 原生表格显示
-import pandas as pd
 df = pd.DataFrame(transcript_data, columns=["Turn", "Speaker", "Content"])
 st.dataframe(df, use_container_width=True, hide_index=True)
 
 st.divider()
 
-# --- Part 1 ---
-st.markdown("### Part 1: Identify & Justify (15 min)")
-st.markdown("""
-Read the classroom transcript carefully. Identify all the dialogic teaching strategies (talk moves) you can find. For each one:
+# ==========================================
+# 2. APT Knowledge Base (Reference)
+# ==========================================
 
-1. **Quote** the specific line(s) from the transcript
-2. **Name** the talk move
-3. **Explain** why you think it is that particular move (not just label it)
-
-⚠️ Note: Some parts of the dialogue might look like a talk move but may not fully qualify. Include those too and explain your reasoning.
-
-💡 **Use the AI chatbot to help you** — discuss your analysis, ask questions, check your reasoning.
-""")
-
-st.info("📋 When you finish Part 1, submit your analysis in the form below before moving on.")
-# ✏️ 你可以在这里嵌入问卷链接
-st.markdown("[📋 Submit Part 1 Analysis](YOUR_SURVEY_LINK_HERE)", unsafe_allow_html=False)
-
-st.divider()
-
-# --- Part 2 ---
-st.markdown("### Part 2: Analyse & Evaluate (20 min)")
-st.markdown("""
-Now evaluate the overall quality of the classroom dialogue. Consider questions like:
-
-- Does the dialogue achieve the learning goals of this segment?
-- Which talk moves were used effectively? Why?
-- Which ones were used less effectively or could have been better? Why?
-- Are there any **missed opportunities** — moments where the teacher could have used a talk move but didn't?
-- Did all students participate, or only a limited number?
-- Choose one section (3-5 turns) that you think could be improved. **Rewrite it** to demonstrate better use of dialogic teaching strategies.
-
-💡 **Use the AI chatbot to help you** — discuss your evaluation, try out rewrite ideas, get feedback.
-""")
-
-st.info("📤 When you finish Part 2, post your evaluation to the Moodle Discussion Forum.")
-st.markdown("[📤 Submit to Moodle Discussion Forum](YOUR_MOODLE_LINK_HERE)", unsafe_allow_html=False)
-
-st.divider()
-
-# --- APT 知识库 ---
 st.markdown("## 📖 Reference: APT Talk Moves")
 
 with st.expander("🎯 Goal 1: Help students share, expand, and clarify their thinking", expanded=False):
@@ -147,3 +120,4 @@ with st.expander("📐 Accountable Talk: Three Dimensions", expanded=False):
 - **To Accurate Knowledge:** Be specific and accurate, use verifiable sources.
 - **To Rigorous Thinking:** Push for quality of claims & arguments, use sufficient and credible evidence.
 """)
+
